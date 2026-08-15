@@ -1,4 +1,4 @@
-/* Pelo — styles.css additions for dashboard */
+
 .dashboard-card{max-width:900px;margin:32px auto;padding:20px}
 .user-info{display:flex;gap:14px;align-items:center}
 .section{margin-top:18px}
@@ -12,7 +12,6 @@
 .guild-name{font-weight:600}
 .owner-badge{align-self:flex-start;background:rgba(255,255,255,0.04);padding:2px 8px;border-radius:999px;font-size:12px;color:var(--muted);margin-top:6px}
 
-/* Guild settings panel */
 .guild-settings-header{display:flex;gap:12px;align-items:center;margin-bottom:12px}
 .guild-settings-icon img{width:72px;height:72px;border-radius:12px}
 .guild-settings-form label{display:block;color:inherit}
