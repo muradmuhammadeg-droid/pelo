@@ -1,9 +1,10 @@
 // js/dashboard.js
-// Simple client-side Discord OAuth2 flow using implicit token (response_type=token).
-// NOTE: implicit flow exposes access tokens in the browser and is not recommended for production.
-// Replace CLIENT_ID and ensure the redirect URI is registered in your Discord application settings.
+// Client-side Discord OAuth2 dashboard (implicit flow). Adds best-effort check for Pelo installation
+// and provides an Invite flow if the bot is not present. Note: Discord API restrictions mean we cannot
+// *reliably* determine bot presence from client-side in all cases; this performs a best-effort check
+// by attempting to fetch the bot as a guild member and falls back to showing the Invite button.
 (function(){
-  const CLIENT_ID = '1538172604832153710';
+  const CLIENT_ID = '1538172604832153710'; // Pelo application / bot client id
   const SCOPES = ['identify','guilds'];
   const REDIRECT_URI = 'https://muradmuhammadeg-droid.github.io/pelo/dashboard.html'; // must match registered redirect
 
@@ -26,6 +27,17 @@
       response_type: 'token',
       scope: SCOPES.join(' '),
       prompt: 'consent'
+    });
+    return `${base}?${params.toString()}`;
+  }
+
+  function buildInviteUrl(){
+    // Invite link for Pelo bot. Adjust permissions as needed. Using applications.commands + bot scope.
+    const base = 'https://discord.com/api/oauth2/authorize';
+    const params = new URLSearchParams({
+      client_id: CLIENT_ID,
+      scope: 'bot applications.commands',
+      permissions: '8' // default admin-level — change to least required in production
     });
     return `${base}?${params.toString()}`;
   }
@@ -54,12 +66,11 @@
     const res = await fetch(`https://discord.com/api${path}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if(!res.ok) throw new Error(await res.text());
+    if(!res.ok) throw new Error(`${res.status} ${await res.text()}`);
     return res.json();
   }
 
   function canManageGuild(guild){
-    // guild.permissions may be a string; coerce to BigInt for safety
     try{
       const perms = typeof guild.permissions === 'string' ? BigInt(guild.permissions) : BigInt(Number(guild.permissions || 0));
       const MANAGE_GUILD = BigInt(1 << 5); // 0x20
@@ -69,20 +80,37 @@
     }
   }
 
+  // Best-effort check: attempt to fetch the bot as a guild member using the user's token.
+  // This will succeed only in some cases (user token with proper scopes/permissions may still be blocked).
+  // If it returns 200, we treat the bot as installed. If 404, not installed. If 403 or other error,
+  // we treat as "unknown" and show Invite + Open settings options so user can proceed.
+  async function checkBotInstalled(guildId, token){
+    try{
+      const path = `/guilds/${guildId}/members/${CLIENT_ID}`;
+      const res = await fetch(`https://discord.com/api${path}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if(res.status === 200) return true;
+      if(res.status === 404) return false;
+      // 403 or other -> unknown (fall back to invite UX)
+      return null;
+    }catch(e){
+      return null;
+    }
+  }
+
   function renderGuilds(guilds){
     guildsList.innerHTML = '';
     guilds.forEach(g => {
       const li = document.createElement('li');
       li.className = 'guild-item';
 
-      // clickable wrapper to open Pelo settings for this guild (internal dashboard view)
-      const link = document.createElement('a');
-      link.href = `dashboard.html?guild_id=${g.id}`;
-      link.className = 'guild-link';
-      link.setAttribute('data-guild-id', g.id);
-      link.rel = 'noopener noreferrer';
+      const card = document.createElement('div');
+      card.className = 'guild-card';
 
-      // icon
+      // visual content
+      const left = document.createElement('div');
+      left.className = 'guild-left';
       const iconWrap = document.createElement('div');
       iconWrap.className = 'guild-icon';
       if (g.icon) {
@@ -96,15 +124,14 @@
         fallback.textContent = g.name.charAt(0).toUpperCase();
         iconWrap.appendChild(fallback);
       }
+      left.appendChild(iconWrap);
 
-      // info
       const info = document.createElement('div');
       info.className = 'guild-info';
       const name = document.createElement('div');
       name.className = 'guild-name';
       name.textContent = g.name;
       info.appendChild(name);
-
       if (g.owner) {
         const ownerBadge = document.createElement('span');
         ownerBadge.className = 'owner-badge';
@@ -116,16 +143,62 @@
         mgrBadge.textContent = 'Manage';
         info.appendChild(mgrBadge);
       }
+      left.appendChild(info);
 
-      link.appendChild(iconWrap);
-      link.appendChild(info);
-      li.appendChild(link);
+      const actions = document.createElement('div');
+      actions.className = 'guild-actions';
+
+      const openBtn = document.createElement('button');
+      openBtn.className = 'btn outline';
+      openBtn.textContent = 'Open Pelo settings';
+      openBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        // On click: attempt to check bot installed, then either open settings or open invite then settings
+        const token = loadToken();
+        if(!token){ alert('Not signed in'); return; }
+        const installed = await checkBotInstalled(g.id, token);
+        if(installed === true){
+          // open internal settings view
+          history.replaceState(null, '', `${REDIRECT_URI}?guild_id=${g.id}`);
+          showGuildSettings(g);
+        }else if(installed === false){
+          // not installed: open invite in new tab then instruct user to return to settings
+          const invite = buildInviteUrl();
+          window.open(invite, '_blank', 'noopener');
+          // after invite, navigate to internal settings where the user can configure
+          setTimeout(()=>{
+            history.replaceState(null, '', `${REDIRECT_URI}?guild_id=${g.id}`);
+            showGuildSettings(g, {preInvite:true});
+          }, 800);
+        }else{
+          // unknown: show a small confirmation offering both options
+          const proceed = confirm('Cannot verify whether Pelo is installed in this server. Click OK to open Pelo settings; Cancel to open the invite link to add Pelo.');
+          if(proceed){ history.replaceState(null, '', `${REDIRECT_URI}?guild_id=${g.id}`); showGuildSettings(g); }
+          else{ window.open(buildInviteUrl(), '_blank', 'noopener'); }
+        }
+      });
+
+      const inviteBtn = document.createElement('button');
+      inviteBtn.className = 'btn primary';
+      inviteBtn.textContent = 'Invite Pelo';
+      inviteBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        window.open(buildInviteUrl(), '_blank', 'noopener');
+      });
+
+      actions.appendChild(openBtn);
+      actions.appendChild(inviteBtn);
+
+      card.appendChild(left);
+      card.appendChild(actions);
+
+      li.appendChild(card);
       guildsList.appendChild(li);
-
     });
   }
 
-  function showGuildSettings(guild){
+  function showGuildSettings(guild, opts){
+    opts = opts || {};
     guildSettingsEl.style.display = 'block';
     guildSettingsEl.innerHTML = '';
 
@@ -133,24 +206,27 @@
     titleWrap.className = 'guild-settings-header';
     const icon = document.createElement('div');
     icon.className = 'guild-settings-icon';
-    if(g.icon){
+    if(guild.icon){
       const img = document.createElement('img');
-      img.src = `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`;
-      img.alt = `${g.name} icon`;
+      img.src = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=128`;
+      img.alt = `${guild.name} icon`;
       icon.appendChild(img);
     } else {
-      const fb = document.createElement('div'); fb.className='guild-fallback'; fb.textContent = g.name.charAt(0).toUpperCase(); icon.appendChild(fb);
+      const fb = document.createElement('div'); fb.className='guild-fallback'; fb.textContent = guild.name.charAt(0).toUpperCase(); icon.appendChild(fb);
     }
     const h = document.createElement('div');
-    h.innerHTML = `<h3>${g.name}</h3><p class="muted small">Guild ID: ${g.id}</p>`;
+    h.innerHTML = `<h3>${guild.name}</h3><p class="muted small">Guild ID: ${guild.id}</p>`;
     titleWrap.appendChild(icon);
     titleWrap.appendChild(h);
+
+    const statusP = document.createElement('p');
+    statusP.className = 'muted small';
+    statusP.textContent = opts.preInvite ? 'Invite opened in a new tab — once Pelo is added, return here and click Save.' : '';
 
     const form = document.createElement('div');
     form.className = 'guild-settings-form';
 
-    // load existing settings from localStorage (demo-only)
-    const settingsKey = `pelo_settings_${g.id}`;
+    const settingsKey = `pelo_settings_${guild.id}`;
     let settings = { prefix: '!', moderation: true };
     try{ const raw = localStorage.getItem(settingsKey); if(raw) settings = JSON.parse(raw); }catch(e){}
 
@@ -160,15 +236,16 @@
       <div style="margin-top:12px">
         <button id="gs-save" class="btn primary">Save settings</button>
         <button id="gs-back" class="btn outline">Back to servers</button>
+        <button id="gs-invite" class="btn">Invite Pelo to this server</button>
       </div>
     `;
 
     guildSettingsEl.appendChild(titleWrap);
+    guildSettingsEl.appendChild(statusP);
     guildSettingsEl.appendChild(form);
 
     document.getElementById('gs-back').addEventListener('click', function(e){
       e.preventDefault();
-      // remove guild_id from URL and hide settings
       history.replaceState(null, '', REDIRECT_URI);
       guildSettingsEl.style.display = 'none';
     });
@@ -179,6 +256,11 @@
       const payload = { prefix, moderation };
       localStorage.setItem(settingsKey, JSON.stringify(payload));
       alert('Settings saved (demo only).');
+    });
+
+    document.getElementById('gs-invite').addEventListener('click', function(e){
+      e.preventDefault();
+      window.open(buildInviteUrl(), '_blank', 'noopener');
     });
   }
 
@@ -209,7 +291,6 @@
         if(match){
           showGuildSettings(match);
         } else {
-          // guild not found (maybe user left it) — show message
           guildSettingsEl.style.display = 'block';
           guildSettingsEl.innerHTML = `<p class="muted">Cannot manage this server (not found in your guild list).</p><button id="gs-back2" class="btn outline">Back to servers</button>`;
           document.getElementById('gs-back2').addEventListener('click', ()=>{ history.replaceState(null,'',REDIRECT_URI); guildSettingsEl.style.display='none'; });
@@ -236,7 +317,6 @@
     signinActions.style.display = '';
     authMsg.style.display = '';
     authMsg.textContent = 'Signed out.';
-    // remove token from URL if present
     history.replaceState(null, '', REDIRECT_URI);
   });
 
