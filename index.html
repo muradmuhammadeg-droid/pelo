@@ -50,15 +50,15 @@
         <div class="hero-right" aria-hidden>
           <div class="card">
             <h3>Pelo Invite</h3>
-            <p>Enter an invite code (or use the default) then open Discord invite.</p>
+            <p>Use the install link below or paste a different invite URL if you prefer.</p>
             <label class="field">
-              <input id="invite-input" type="text" placeholder="discord.gg/YOURCODE" value="discord.gg/YOURCODE" aria-label="Discord invite link" />
+              <input id="invite-input" type="text" placeholder="https://discord.com/oauth2/authorize?client_id=..." value="https://discord.com/oauth2/authorize?client_id=1538172604832153710" aria-label="Discord invite link" />
             </label>
             <div class="card-actions">
               <button id="open-invite" class="btn primary">Open Invite</button>
               <button id="copy-invite" class="btn outline">Copy</button>
             </div>
-            <p class="muted small">If you don't have an invite code yet, use the default placeholder and replace YOURCODE with your server's invite code.</p>
+            <p class="muted small">The button will open the official Discord OAuth2 install page where you can select which server to add Pelo to.</p>
           </div>
         </div>
       </section>
@@ -87,10 +87,10 @@
 
       <section id="invite" class="container invite-section">
         <h2>Invite Pelo</h2>
-        <p class="lead">Click the button below to open the Discord invite in a new tab. Make sure you are logged in to Discord and have Manage Server permissions.</p>
+        <p class="lead">Click the button below to open the official Discord install page in a new tab. Make sure you are logged in to Discord and have Manage Server permissions for the server you want to add Pelo to.</p>
 
         <div class="invite-actions">
-          <a id="invite-link" class="btn primary large" href="https://discord.com/invite/YOURCODE" target="_blank" rel="noopener">Invite Pelo to your server</a>
+          <a id="invite-link" class="btn primary large" href="https://discord.com/oauth2/authorize?client_id=1538172604832153710" target="_blank" rel="noopener">Invite Pelo to your server</a>
           <button id="copy-invite-2" class="btn outline large">Copy invite link</button>
         </div>
         <div id="toast" class="toast" role="status" aria-live="polite"></div>
