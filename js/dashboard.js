@@ -1,8 +1,3 @@
-// js/dashboard.js
-// Client-side Discord OAuth2 dashboard (implicit flow). Adds best-effort check for Pelo installation
-// and provides an Invite flow if the bot is not present. Note: Discord API restrictions mean we cannot
-// *reliably* determine bot presence from client-side in all cases; this performs a best-effort check
-// by attempting to fetch the bot as a guild member and falls back to showing the Invite button.
 (function(){
   const CLIENT_ID = '1538172604832153710'; // Pelo application / bot client id
   const SCOPES = ['identify','guilds'];
@@ -80,10 +75,6 @@
     }
   }
 
-  // Best-effort check: attempt to fetch the bot as a guild member using the user's token.
-  // This will succeed only in some cases (user token with proper scopes/permissions may still be blocked).
-  // If it returns 200, we treat the bot as installed. If 404, not installed. If 403 or other error,
-  // we treat as "unknown" and show Invite + Open settings options so user can proceed.
   async function checkBotInstalled(guildId, token){
     try{
       const path = `/guilds/${guildId}/members/${CLIENT_ID}`;
@@ -92,7 +83,6 @@
       });
       if(res.status === 200) return true;
       if(res.status === 404) return false;
-      // 403 or other -> unknown (fall back to invite UX)
       return null;
     }catch(e){
       return null;
@@ -153,7 +143,6 @@
       openBtn.textContent = 'Open Pelo settings';
       openBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        // On click: attempt to check bot installed, then either open settings or open invite then settings
         const token = loadToken();
         if(!token){ alert('Not signed in'); return; }
         const installed = await checkBotInstalled(g.id, token);
@@ -162,16 +151,13 @@
           history.replaceState(null, '', `${REDIRECT_URI}?guild_id=${g.id}`);
           showGuildSettings(g);
         }else if(installed === false){
-          // not installed: open invite in new tab then instruct user to return to settings
           const invite = buildInviteUrl();
           window.open(invite, '_blank', 'noopener');
-          // after invite, navigate to internal settings where the user can configure
           setTimeout(()=>{
             history.replaceState(null, '', `${REDIRECT_URI}?guild_id=${g.id}`);
             showGuildSettings(g, {preInvite:true});
           }, 800);
         }else{
-          // unknown: show a small confirmation offering both options
           const proceed = confirm('Cannot verify whether Pelo is installed in this server. Click OK to open Pelo settings; Cancel to open the invite link to add Pelo.');
           if(proceed){ history.replaceState(null, '', `${REDIRECT_URI}?guild_id=${g.id}`); showGuildSettings(g); }
           else{ window.open(buildInviteUrl(), '_blank', 'noopener'); }
@@ -275,15 +261,12 @@
       userName.textContent = `${user.username}#${user.discriminator}`;
       userId.textContent = `ID: ${user.id}`;
       userAvatar.src = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : '';
-      // fetch guilds
       const guilds = await fetchDiscordAPI('/users/@me/guilds', token);
       renderGuilds(guilds);
 
       signinActions.style.display = 'none';
       userArea.style.display = 'block';
       authMsg.style.display = 'none';
-
-      // if URL has guild_id param, show settings for that guild
       const params = new URLSearchParams(window.location.search);
       const selected = params.get('guild_id');
       if(selected){
@@ -306,7 +289,6 @@
     }
   }
 
-  // Handle sign-in button
   signinBtn.addEventListener('click', function(){
     window.location.href = buildDiscordAuthUrl();
   });
@@ -320,12 +302,10 @@
     history.replaceState(null, '', REDIRECT_URI);
   });
 
-  // On load: check URL hash (OAuth implicit), then localStorage
   (function init(){
     const parsed = parseHash(window.location.hash);
     if(parsed && parsed.access_token){
       saveToken(parsed.access_token);
-      // clear hash from URL for cleanliness
       history.replaceState(null, '', REDIRECT_URI + window.location.search);
     }
     const token = loadToken();
