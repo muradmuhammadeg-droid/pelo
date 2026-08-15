@@ -2,5 +2,18 @@
 .dashboard-card{max-width:900px;margin:32px auto;padding:20px}
 .user-info{display:flex;gap:14px;align-items:center}
 .section{margin-top:18px}
-#guilds-list{list-style:none;padding-left:0}
-#guilds-list li{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;margin-bottom:8px}
+#guilds-list{list-style:none;padding-left:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.guild-item{list-style:none}
+.guild-link{display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);transition:transform .12s ease,box-shadow .12s ease;border:1px solid rgba(255,255,255,0.02)}
+.guild-link:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+.guild-icon img{width:56px;height:56px;border-radius:12px;object-fit:cover;display:block}
+.guild-fallback{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#fff;font-weight:700;font-size:20px}
+.guild-info{display:flex;flex-direction:column;gap:6px}
+.guild-name{font-weight:600}
+.owner-badge{align-self:flex-start;background:rgba(255,255,255,0.04);padding:2px 8px;border-radius:999px;font-size:12px;color:var(--muted);margin-top:6px}
+
+/* Guild settings panel */
+.guild-settings-header{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.guild-settings-icon img{width:72px;height:72px;border-radius:12px}
+.guild-settings-form label{display:block;color:inherit}
+.guild-settings-form input[type="text"]{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;margin-top:6px}
