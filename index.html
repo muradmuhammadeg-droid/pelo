@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pelo — Secure Discord Bot</title>
+    <meta name="description" content="Pelo — The best secure bot for Discord servers. Invite Pelo to your server and protect it today." />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="#"> 
+          <svg class="logo" width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <rect width="24" height="24" rx="6" fill="url(#g)"/>
+            <defs>
+              <linearGradient id="g" x1="0" x2="1">
+                <stop offset="0" stop-color="#7C3AED" />
+                <stop offset="1" stop-color="#06B6D4" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="brand-title">Pelo</span>
+        </a>
+        <nav class="nav">
+          <a href="#features">Features</a>
+          <a href="#invite">Invite</a>
+          <a href="https://github.com/muradmuhammadeg-droid/pelo" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero container">
+        <div class="hero-left">
+          <h1>Pelo — Secure Discord moderation, made simple</h1>
+          <p class="lead">Protect your server with advanced moderation tools, permission-safe automations, and privacy-first design. Trusted, lightweight, and easy to invite.</p>
+
+          <div class="cta-row">
+            <a id="invite-btn" class="btn primary" href="#invite">Invite to Discord</a>
+            <button id="copy-btn" class="btn outline">Copy Invite Link</button>
+          </div>
+
+          <ul class="highlights">
+            <li>Privacy-first moderation</li>
+            <li>Customizable automations</li>
+            <li>Fast setup & role-safe defaults</li>
+          </ul>
+        </div>
+        <div class="hero-right" aria-hidden>
+          <div class="card">
+            <h3>Pelo Invite</h3>
+            <p>Enter an invite code (or use the default) then open Discord invite.</p>
+            <label class="field">
+              <input id="invite-input" type="text" placeholder="discord.gg/YOURCODE" value="discord.gg/YOURCODE" aria-label="Discord invite link" />
+            </label>
+            <div class="card-actions">
+              <button id="open-invite" class="btn primary">Open Invite</button>
+              <button id="copy-invite" class="btn outline">Copy</button>
+            </div>
+            <p class="muted small">If you don't have an invite code yet, use the default placeholder and replace YOURCODE with your server's invite code.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="container features">
+        <h2>Features</h2>
+        <div class="grid">
+          <article class="feature">
+            <h3>Moderation Tools</h3>
+            <p>Automated moderation with configurable thresholds, warnings, and audit logs.</p>
+          </article>
+          <article class="feature">
+            <h3>Role-safe</h3>
+            <p>Minimal permissions by default — Pelo asks only for what's necessary.</p>
+          </article>
+          <article class="feature">
+            <h3>Automations</h3>
+            <p>Auto-moderation, welcome messages, and scheduled tasks with simple commands.</p>
+          </article>
+          <article class="feature">
+            <h3>Privacy-first</h3>
+            <p>We respect your server data and keep stored data to a minimum.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="invite" class="container invite-section">
+        <h2>Invite Pelo</h2>
+        <p class="lead">Click the button below to open the Discord invite in a new tab. Make sure you are logged in to Discord and have Manage Server permissions.</p>
+
+        <div class="invite-actions">
+          <a id="invite-link" class="btn primary large" href="https://discord.com/invite/YOURCODE" target="_blank" rel="noopener">Invite Pelo to your server</a>
+          <button id="copy-invite-2" class="btn outline large">Copy invite link</button>
+        </div>
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>Made with ❤️ — <a href="https://github.com/muradmuhammadeg-droid/pelo" target="_blank" rel="noopener">pelo on GitHub</a></p>
+      </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+  </body>
+</html>
