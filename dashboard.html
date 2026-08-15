@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pelo Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/">
+        <img src="images/pelo1.png" alt="Pelo Logo" class="header-logo" />
+        <span class="brand-title">Pelo</span>
+      </a>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="https://github.com/muradmuhammadeg-droid/pelo" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card dashboard-card">
+      <h2>Dashboard</h2>
+      <div id="auth-area">
+        <p id="auth-msg">Checking sign-in status…</p>
+        <div id="signin-actions" style="display:none;">
+          <button id="signin-btn" class="btn primary">Sign in with Discord</button>
+        </div>
+      </div>
+
+      <div id="user-area" style="display:none;">
+        <div class="user-info">
+          <img id="user-avatar" src="" alt="avatar" style="width:80px;height:80px;border-radius:50%" />
+          <div>
+            <h3 id="user-name"></h3>
+            <p id="user-id" class="muted small"></p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4>Your servers</h4>
+          <ul id="guilds-list"></ul>
+        </div>
+
+        <div class="section">
+          <button id="logout-btn" class="btn outline">Sign out</button>
+        </div>
+      </div>
+
+      <p class="muted small">This dashboard uses the Discord OAuth2 implicit flow for a simple demo. For production, use a backend with the authorization code flow and keep your client secret private.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="muted small">Pelo — Dashboard</p>
+    </div>
+  </footer>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

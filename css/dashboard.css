@@ -1,0 +1,6 @@
+/* Pelo — styles.css additions for dashboard */
+.dashboard-card{max-width:900px;margin:32px auto;padding:20px}
+.user-info{display:flex;gap:14px;align-items:center}
+.section{margin-top:18px}
+#guilds-list{list-style:none;padding-left:0}
+#guilds-list li{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;margin-bottom:8px}
